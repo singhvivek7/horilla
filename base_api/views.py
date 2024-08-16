@@ -1,27 +1,63 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from base.filters import (RotatingShiftAssignFilters, RotatingWorkTypeAssignFilter, ShiftRequestFilter,
-                          WorkTypeRequestFilter)
-from base.views import (is_reportingmanger, rotating_work_type_assign_export,
-                        shift_request_export, work_type_request_export)
-from base_api.decorators import (check_approval_status, manager_or_owner_permission_required,
-                                 manager_permission_required)
-from employee.models import Actiontype
-from base_api.methods import groupby_queryset, permission_based_queryset
-from horilla.decorators import permission_required
-from .serializers import (ActiontypeSerializer, CompanySerializer, DepartmentSerializer,
-                          EmployeeShiftScheduleSerializer, EmployeeShiftSerializer, JobPositionSerializer,
-                          JobRoleSerializer, RotatingShiftAssignSerializer, RotatingShiftSerializer,
-                          RotatingWorkTypeAssignSerializer, RotatingWorkTypeSerializer,
-                          ShiftRequestSerializer, WorkTypeRequestSerializer, WorkTypeSerializer)
-from base.models import (Department, EmployeeShift, EmployeeShiftSchedule, JobPosition, JobRole, Company,
-                         RotatingShift, RotatingShiftAssign, RotatingWorkType, RotatingWorkTypeAssign,
-                         ShiftRequest, WorkType, WorkTypeRequest)
+from django.utils.decorators import method_decorator
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
-from django_filters.rest_framework import DjangoFilterBackend
-from django.utils.decorators import method_decorator
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from base.filters import (
+    RotatingShiftAssignFilters,
+    RotatingWorkTypeAssignFilter,
+    ShiftRequestFilter,
+    WorkTypeRequestFilter,
+)
+from base.models import (
+    Company,
+    Department,
+    EmployeeShift,
+    EmployeeShiftSchedule,
+    JobPosition,
+    JobRole,
+    RotatingShift,
+    RotatingShiftAssign,
+    RotatingWorkType,
+    RotatingWorkTypeAssign,
+    ShiftRequest,
+    WorkType,
+    WorkTypeRequest,
+)
+from base.views import (
+    is_reportingmanger,
+    rotating_work_type_assign_export,
+    shift_request_export,
+    work_type_request_export,
+)
+from base_api.decorators import (
+    check_approval_status,
+    manager_or_owner_permission_required,
+    manager_permission_required,
+)
+from base_api.methods import groupby_queryset, permission_based_queryset
+from employee.models import Actiontype
+from horilla.decorators import permission_required
 from notifications.signals import notify
+
+from .serializers import (
+    ActiontypeSerializer,
+    CompanySerializer,
+    DepartmentSerializer,
+    EmployeeShiftScheduleSerializer,
+    EmployeeShiftSerializer,
+    JobPositionSerializer,
+    JobRoleSerializer,
+    RotatingShiftAssignSerializer,
+    RotatingShiftSerializer,
+    RotatingWorkTypeAssignSerializer,
+    RotatingWorkTypeSerializer,
+    ShiftRequestSerializer,
+    WorkTypeRequestSerializer,
+    WorkTypeSerializer,
+)
 
 
 def object_check(cls, pk):
@@ -91,7 +127,7 @@ class DepartmentView(APIView):
     serializer_class = DepartmentSerializer
     permission_classes = [IsAuthenticated]
 
-    @method_decorator(permission_required("base.view_department"), name='dispatch')
+    @method_decorator(permission_required("base.view_department"), name="dispatch")
     def get(self, request, pk=None):
         if pk:
             department = object_check(Department, pk)
@@ -106,7 +142,7 @@ class DepartmentView(APIView):
         serializer = self.serializer_class(page, many=True)
         return paginator.get_paginated_response(serializer.data)
 
-    @method_decorator(permission_required("base.change_department"), name='dispatch')
+    @method_decorator(permission_required("base.change_department"), name="dispatch")
     def put(self, request, pk):
         department = object_check(Department, pk)
         if department is None:
@@ -117,7 +153,7 @@ class DepartmentView(APIView):
             return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("base.add_department"), name='dispatch')
+    @method_decorator(permission_required("base.add_department"), name="dispatch")
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -125,7 +161,7 @@ class DepartmentView(APIView):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("base.delete_department"), name='dispatch')
+    @method_decorator(permission_required("base.delete_department"), name="dispatch")
     def delete(self, request, pk):
         department = object_check(Department, pk)
         if department is None:
@@ -138,7 +174,7 @@ class JobRoleView(APIView):
     serializer_class = JobRoleSerializer
     permission_classes = [IsAuthenticated]
 
-    @method_decorator(permission_required("base.view_jobrole"), name='dispatch')
+    @method_decorator(permission_required("base.view_jobrole"), name="dispatch")
     def get(self, request, pk=None):
         if pk:
             job_role = object_check(JobRole, pk)
@@ -153,7 +189,7 @@ class JobRoleView(APIView):
         serializer = self.serializer_class(page, many=True)
         return paginator.get_paginated_response(serializer.data)
 
-    @method_decorator(permission_required("base.change_jobrole"), name='dispatch')
+    @method_decorator(permission_required("base.change_jobrole"), name="dispatch")
     def put(self, request, pk):
         job_role = object_check(JobRole, pk)
         if job_role is None:
@@ -164,7 +200,7 @@ class JobRoleView(APIView):
             return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("base.add_jobrole"), name='dispatch')
+    @method_decorator(permission_required("base.add_jobrole"), name="dispatch")
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -172,7 +208,7 @@ class JobRoleView(APIView):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("base.delete_jobrole"), name='dispatch')
+    @method_decorator(permission_required("base.delete_jobrole"), name="dispatch")
     def delete(self, request, pk):
         job_role = object_check(JobRole, pk)
         if job_role is None:
@@ -185,7 +221,7 @@ class CompanyView(APIView):
     serializer_class = CompanySerializer
     permission_classes = [IsAuthenticated]
 
-    @method_decorator(permission_required("base.view_company"), name='dispatch')
+    @method_decorator(permission_required("base.view_company"), name="dispatch")
     def get(self, request, pk=None):
         if pk:
             company = object_check(Company, pk)
@@ -200,7 +236,7 @@ class CompanyView(APIView):
         serializer = self.serializer_class(page, many=True)
         return paginator.get_paginated_response(serializer.data)
 
-    @method_decorator(permission_required("base.change_company"), name='dispatch')
+    @method_decorator(permission_required("base.change_company"), name="dispatch")
     def put(self, request, pk):
         company = object_check(Company, pk)
         if company is None:
@@ -211,7 +247,7 @@ class CompanyView(APIView):
             return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("base.add_company"), name='dispatch')
+    @method_decorator(permission_required("base.add_company"), name="dispatch")
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -219,7 +255,7 @@ class CompanyView(APIView):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("base.delete_company"), name='dispatch')
+    @method_decorator(permission_required("base.delete_company"), name="dispatch")
     def delete(self, request, pk):
         company = object_check(Company, pk)
         if company is None:
@@ -232,7 +268,6 @@ class WorkTypeView(APIView):
     serializer_class = WorkTypeSerializer
     permission_classes = [IsAuthenticated]
 
-    @method_decorator(permission_required("base.view_worktype"), name='dispatch')
     def get(self, request, pk=None):
         if pk:
             work_type = object_check(WorkType, pk)
@@ -245,7 +280,7 @@ class WorkTypeView(APIView):
         serializer = self.serializer_class(work_types, many=True)
         return Response(serializer.data)
 
-    @method_decorator(permission_required("base.add_worktype"), name='dispatch')
+    @method_decorator(permission_required("base.add_worktype"), name="dispatch")
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -253,7 +288,7 @@ class WorkTypeView(APIView):
             return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("base.change_worktype"), name='dispatch')
+    @method_decorator(permission_required("base.change_worktype"), name="dispatch")
     def put(self, request, pk):
         work_type = object_check(WorkType, pk)
         if work_type is None:
@@ -264,7 +299,7 @@ class WorkTypeView(APIView):
             return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("base.delete_worktype"), name='dispatch')
+    @method_decorator(permission_required("base.delete_worktype"), name="dispatch")
     def delete(self, request, pk):
         work_type = object_check(WorkType, pk)
         if work_type is None:
@@ -283,7 +318,7 @@ class WorkTypeRequestView(APIView):
         user = request.user
         # checking user level permissions
         perm = "base.view_worktyperequest"
-        queryset = permission_based_queryset(user, perm, queryset,user_obj=True)
+        queryset = permission_based_queryset(user, perm, queryset, user_obj=True)
         return queryset
 
     def get(self, request, pk=None):
@@ -298,16 +333,18 @@ class WorkTypeRequestView(APIView):
         work_type_requests = self.get_queryset(request)
         # filtering queryset
         work_type_request_filter_queryset = self.filterset_class(
-            request.GET, queryset=work_type_requests).qs
+            request.GET, queryset=work_type_requests
+        ).qs
         # groupby workflow
         field_name = request.GET.get("groupby_field", None)
         if field_name:
             url = request.build_absolute_uri()
-            return groupby_queryset(request, url, field_name, work_type_request_filter_queryset)
+            return groupby_queryset(
+                request, url, field_name, work_type_request_filter_queryset
+            )
         # pagination workflow
         paginater = PageNumberPagination()
-        page = paginater.paginate_queryset(
-            work_type_request_filter_queryset, request)
+        page = paginater.paginate_queryset(work_type_request_filter_queryset, request)
         serializer = self.serializer_class(page, many=True)
         return paginater.get_paginated_response(serializer.data)
 
@@ -318,44 +355,47 @@ class WorkTypeRequestView(APIView):
             instance = serializer.save()
             try:
                 notify.send(
-                        instance.employee_id,
-                        recipient=(
-                            instance.employee_id.employee_work_info.reporting_manager_id.employee_user_id
-                        ),
-                        verb=f"You have new work type request to \
+                    instance.employee_id,
+                    recipient=(
+                        instance.employee_id.employee_work_info.reporting_manager_id.employee_user_id
+                    ),
+                    verb=f"You have new work type request to \
                                 validate for {instance.employee_id}",
-                        verb_ar=f"لديك طلب نوع وظيفة جديد للتحقق من \
+                    verb_ar=f"لديك طلب نوع وظيفة جديد للتحقق من \
                                 {instance.employee_id}",
-                        verb_de=f"Sie haben eine neue Arbeitstypanfrage zur \
+                    verb_de=f"Sie haben eine neue Arbeitstypanfrage zur \
                                 Validierung für {instance.employee_id}",
-                        verb_es=f"Tiene una nueva solicitud de tipo de trabajo para \
+                    verb_es=f"Tiene una nueva solicitud de tipo de trabajo para \
                                 validar para {instance.employee_id}",
-                        verb_fr=f"Vous avez une nouvelle demande de type de travail\
+                    verb_fr=f"Vous avez une nouvelle demande de type de travail\
                                 à valider pour {instance.employee_id}",
-                        icon="information",
-                        redirect=f"/employee/work-type-request-view?id={instance.id}",
-                        api_redirect=f"/api/base/worktype-requests/{instance.id}",
-                    )
-            except :
+                    icon="information",
+                    redirect=f"/employee/work-type-request-view?id={instance.id}",
+                    api_redirect=f"/api/base/worktype-requests/{instance.id}",
+                )
+            except:
                 pass
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
     @check_approval_status(WorkTypeRequest, "base.change_worktyperequest")
-    @manager_or_owner_permission_required(WorkTypeRequest, "base.change_worktyperequest")
+    @manager_or_owner_permission_required(
+        WorkTypeRequest, "base.change_worktyperequest"
+    )
     def put(self, request, pk):
         work_type_request = object_check(WorkTypeRequest, pk)
         if work_type_request is None:
             return Response({"error": "WorkTypeRequest not found"}, status=404)
-        serializer = self.serializer_class(
-            work_type_request, data=request.data)
+        serializer = self.serializer_class(work_type_request, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
     @check_approval_status(WorkTypeRequest, "base.change_worktyperequest")
-    @manager_or_owner_permission_required(WorkTypeRequest, "base.delete_worktyperequest")
+    @manager_or_owner_permission_required(
+        WorkTypeRequest, "base.delete_worktyperequest"
+    )
     def delete(self, request, pk):
         work_type_request = object_check(WorkTypeRequest, pk)
         if work_type_request is None:
@@ -363,9 +403,10 @@ class WorkTypeRequestView(APIView):
         response, status_code = object_delete(WorkTypeRequest, pk)
         return Response(response, status=status_code)
 
+
 class WorkTypeRequestCancelView(APIView):
 
-    def put(self,request,pk):
+    def put(self, request, pk):
         work_type_request = WorkTypeRequest.find(pk)
         if (
             is_reportingmanger(request, work_type_request)
@@ -391,15 +432,15 @@ class WorkTypeRequestCancelView(APIView):
                     verb_fr="Votre demande de type de travail a été annulée",
                     redirect=f"/employee/work-type-request-view?id={work_type_request.id}",
                     icon="close",
-                    api_redirect = '/api/base/worktype-requests/<int:pk>/'
+                    api_redirect="/api/base/worktype-requests/<int:pk>/",
                 )
-            except :
+            except:
                 pass
         return Response(status=200)
-    
-    
+
+
 class WorkRequestApproveView(APIView):
-    def put(self,request,pk):
+    def put(self, request, pk):
         work_type_request = WorkTypeRequest.find(pk)
         if (
             is_reportingmanger(request, work_type_request)
@@ -425,12 +466,13 @@ class WorkRequestApproveView(APIView):
                         verb_fr="Votre demande de type de travail a été approuvée.",
                         redirect=f"/employee/work-type-request-view?id={work_type_request.id}",
                         icon="checkmark",
-                        api_redirect ="/api/base/worktype-requests/<int:pk>/"
+                        api_redirect="/api/base/worktype-requests/<int:pk>/",
                     )
                 except:
                     pass
         return Response(status=200)
-    
+
+
 class WorkTypeRequestExport(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -464,7 +506,7 @@ class RotatingWorkTypeView(APIView):
         serializer = self.serializer_class(rotating_work_types, many=True)
         return Response(serializer.data, status=200)
 
-    @method_decorator(permission_required("base.add_rotatingworktype"), name='dispatch')
+    @method_decorator(permission_required("base.add_rotatingworktype"), name="dispatch")
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -472,19 +514,22 @@ class RotatingWorkTypeView(APIView):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("base.change_rotatingworktype"), name='dispatch')
+    @method_decorator(
+        permission_required("base.change_rotatingworktype"), name="dispatch"
+    )
     def put(self, request, pk):
         rotating_work_type = object_check(RotatingWorkType, pk)
         if rotating_work_type is None:
             return Response({"error": "RotatingWorkType not found"}, status=404)
-        serializer = self.serializer_class(
-            rotating_work_type, data=request.data)
+        serializer = self.serializer_class(rotating_work_type, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("base.delete_rotatingworktype"), name='dispatch')
+    @method_decorator(
+        permission_required("base.delete_rotatingworktype"), name="dispatch"
+    )
     def delete(self, request, pk):
         rotating_work_type = object_check(RotatingWorkType, pk)
         if rotating_work_type is None:
@@ -502,26 +547,30 @@ class RotatingWorkTypeAssignView(APIView):
     def get(self, request, pk=None):
 
         if pk:
-            rotating_work_type_assign = object_check(
-                RotatingWorkTypeAssign, pk)
+            rotating_work_type_assign = object_check(RotatingWorkTypeAssign, pk)
             if rotating_work_type_assign is None:
-                return Response({"error": "RotatingWorkTypeAssign not found"}, status=404)
+                return Response(
+                    {"error": "RotatingWorkTypeAssign not found"}, status=404
+                )
             serializer = self.serializer_class(rotating_work_type_assign)
             return Response(serializer.data, status=200)
         rotating_work_type_assigns = RotatingWorkTypeAssign.objects.all()
         rotating_work_type_assigns_filter_queryset = self.filterset_class(
-            request.GET, queryset=rotating_work_type_assigns).qs
+            request.GET, queryset=rotating_work_type_assigns
+        ).qs
         field_name = request.GET.get("groupby_field", None)
         if field_name:
             # groupby workflow
             url = request.build_absolute_uri()
-            return groupby_queryset(request, url, field_name, rotating_work_type_assigns_filter_queryset)
+            return groupby_queryset(
+                request, url, field_name, rotating_work_type_assigns_filter_queryset
+            )
 
         pagenation = PageNumberPagination()
         page = pagenation.paginate_queryset(
-            rotating_work_type_assigns_filter_queryset, request)
-        serializer = self.serializer_class(
-            page, many=True)
+            rotating_work_type_assigns_filter_queryset, request
+        )
+        serializer = self.serializer_class(page, many=True)
         return pagenation.get_paginated_response(serializer.data)
 
     @manager_permission_required("base.add_rotatingworktypeassign")
@@ -541,7 +590,7 @@ class RotatingWorkTypeAssignView(APIView):
                     verb_fr="Vous êtes ajouté au type de travail rotatif",
                     icon="infinite",
                     redirect="/employee/employee-profile/",
-                    api_redirect=''
+                    api_redirect="",
                 )
             except:
                 pass
@@ -553,8 +602,7 @@ class RotatingWorkTypeAssignView(APIView):
         rotating_work_type_assign = object_check(RotatingWorkTypeAssign, pk)
         if rotating_work_type_assign is None:
             return Response({"error": "RotatingWorkTypeAssign not found"}, status=404)
-        serializer = self.serializer_class(
-            rotating_work_type_assign, data=request.data)
+        serializer = self.serializer_class(rotating_work_type_assign, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=200)
@@ -585,7 +633,7 @@ class EmployeeShiftView(APIView):
         serializer = self.serializer_class(employee_shifts, many=True)
         return Response(serializer.data, status=200)
 
-    @method_decorator(permission_required("base.add_employeeshift"), name='dispatch')
+    @method_decorator(permission_required("base.add_employeeshift"), name="dispatch")
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -593,7 +641,7 @@ class EmployeeShiftView(APIView):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("base.change_employeeshift"), name='dispatch')
+    @method_decorator(permission_required("base.change_employeeshift"), name="dispatch")
     def put(self, request, pk):
         employee_shift = object_check(EmployeeShift, pk)
         if employee_shift is None:
@@ -604,7 +652,7 @@ class EmployeeShiftView(APIView):
             return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("base.delete_employeeshift"), name='dispatch')
+    @method_decorator(permission_required("base.delete_employeeshift"), name="dispatch")
     def delete(self, request, pk):
         employee_shift = object_check(EmployeeShift, pk)
         if employee_shift is None:
@@ -617,12 +665,16 @@ class EmployeeShiftScheduleView(APIView):
     serializer_class = EmployeeShiftScheduleSerializer
     permission_classes = [IsAuthenticated]
 
-    @method_decorator(permission_required("base.view_employeeshiftschedule"), name='dispatch')
+    @method_decorator(
+        permission_required("base.view_employeeshiftschedule"), name="dispatch"
+    )
     def get(self, request, pk=None):
         if pk:
             employee_shift_schedule = object_check(EmployeeShiftSchedule, pk)
             if employee_shift_schedule is None:
-                return Response({"error": "EmployeeShiftSchedule not found"}, status=404)
+                return Response(
+                    {"error": "EmployeeShiftSchedule not found"}, status=404
+                )
             serializer = self.serializer_class(employee_shift_schedule)
             return Response(serializer.data, status=200)
 
@@ -630,7 +682,9 @@ class EmployeeShiftScheduleView(APIView):
         serializer = self.serializer_class(employee_shift_schedules, many=True)
         return Response(serializer.data, status=200)
 
-    @method_decorator(permission_required("base.add_employeeshiftschedule"), name='dispatch')
+    @method_decorator(
+        permission_required("base.add_employeeshiftschedule"), name="dispatch"
+    )
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -638,19 +692,22 @@ class EmployeeShiftScheduleView(APIView):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("base.change_employeeshiftschedule"), name='dispatch')
+    @method_decorator(
+        permission_required("base.change_employeeshiftschedule"), name="dispatch"
+    )
     def put(self, request, pk):
         employee_shift_schedule = object_check(EmployeeShiftSchedule, pk)
         if employee_shift_schedule is None:
             return Response({"error": "EmployeeShiftSchedule not found"}, status=404)
-        serializer = self.serializer_class(
-            employee_shift_schedule, data=request.data)
+        serializer = self.serializer_class(employee_shift_schedule, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("base.delete_employeeshiftschedule"), name='dispatch')
+    @method_decorator(
+        permission_required("base.delete_employeeshiftschedule"), name="dispatch"
+    )
     def delete(self, request, pk):
         employee_shift_schedule = object_check(EmployeeShiftSchedule, pk)
         if employee_shift_schedule is None:
@@ -663,7 +720,7 @@ class RotatingShiftView(APIView):
     serializer_class = RotatingShiftSerializer
     permission_classes = [IsAuthenticated]
 
-    @method_decorator(permission_required("base.view_rotatingshift"), name='dispatch')
+    @method_decorator(permission_required("base.view_rotatingshift"), name="dispatch")
     def get(self, request, pk=None):
 
         if pk:
@@ -673,15 +730,19 @@ class RotatingShiftView(APIView):
             serializer = self.serializer_class(rotating_shift)
             return Response(serializer.data, status=200)
 
-        employee_id = request.GET.get('employee_id')  # Get the employee_id from query parameters
+        employee_id = request.GET.get(
+            "employee_id"
+        )  # Get the employee_id from query parameters
         if employee_id:  # Check if employee_ids are present in the request
-            rotating_shifts = RotatingShift.objects.filter(employee_id__in=[employee_id])
+            rotating_shifts = RotatingShift.objects.filter(
+                employee_id__in=[employee_id]
+            )
 
         rotating_shifts = RotatingShift.objects.all()
         serializer = self.serializer_class(rotating_shifts, many=True)
         return Response(serializer.data, status=200)
 
-    @method_decorator(permission_required("base.add_rotatingshift"), name='dispatch')
+    @method_decorator(permission_required("base.add_rotatingshift"), name="dispatch")
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -689,7 +750,7 @@ class RotatingShiftView(APIView):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("base.change_rotatingshift"), name='dispatch')
+    @method_decorator(permission_required("base.change_rotatingshift"), name="dispatch")
     def put(self, request, pk):
         rotating_shift = object_check(RotatingShift, pk)
         if rotating_shift is None:
@@ -700,7 +761,7 @@ class RotatingShiftView(APIView):
             return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("base.delete_rotatingshift"), name='dispatch')
+    @method_decorator(permission_required("base.delete_rotatingshift"), name="dispatch")
     def delete(self, request, pk):
         rotating_shift = object_check(RotatingShift, pk)
         if rotating_shift is None:
@@ -725,16 +786,20 @@ class RotatingShiftAssignView(APIView):
 
         rotating_shift_assigns = RotatingShiftAssign.objects.all()
         rotating_shift_assigns_filter_queryset = self.filterset_class(
-            request.GET, queryset=rotating_shift_assigns).qs
+            request.GET, queryset=rotating_shift_assigns
+        ).qs
         field_name = request.GET.get("groupby_field", None)
         if field_name:
             # groupby workflow
             url = request.build_absolute_uri()
-            return groupby_queryset(request, url, field_name, rotating_shift_assigns_filter_queryset)
+            return groupby_queryset(
+                request, url, field_name, rotating_shift_assigns_filter_queryset
+            )
 
         paginator = PageNumberPagination()
         page = paginator.paginate_queryset(
-            rotating_shift_assigns_filter_queryset, request)
+            rotating_shift_assigns_filter_queryset, request
+        )
         serializer = self.serializer_class(page, many=True)
         return paginator.get_paginated_response(serializer.data)
 
@@ -751,8 +816,7 @@ class RotatingShiftAssignView(APIView):
         rotating_shift_assign = object_check(RotatingShiftAssign, pk)
         if rotating_shift_assign is None:
             return Response({"error": "RotatingShiftAssign not found"}, status=404)
-        serializer = self.serializer_class(
-            rotating_shift_assign, data=request.data)
+        serializer = self.serializer_class(rotating_shift_assign, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=200)
@@ -778,7 +842,7 @@ class ShiftRequestView(APIView):
         user = request.user
         # checking user level permissions
         perm = "base.view_shiftrequest"
-        queryset = permission_based_queryset(user, perm, queryset,user_obj=True)
+        queryset = permission_based_queryset(user, perm, queryset, user_obj=True)
         return queryset
 
     def get(self, request, pk=None):
@@ -792,16 +856,18 @@ class ShiftRequestView(APIView):
         # filter section
         shift_requests = self.get_queryset(request)
         shift_requests_filter_queryset = self.filterset_class(
-            request.GET, queryset=shift_requests).qs
+            request.GET, queryset=shift_requests
+        ).qs
         # groupby section
         field_name = request.GET.get("groupby_field", None)
         if field_name:
             url = request.build_absolute_uri()
-            return groupby_queryset(request, url, field_name, shift_requests_filter_queryset)
+            return groupby_queryset(
+                request, url, field_name, shift_requests_filter_queryset
+            )
         # pagination section
         paginator = PageNumberPagination()
-        page = paginator.paginate_queryset(
-            shift_requests_filter_queryset, request)
+        page = paginator.paginate_queryset(shift_requests_filter_queryset, request)
         serializer = self.serializer_class(page, many=True)
         return paginator.get_paginated_response(serializer.data)
 
@@ -839,7 +905,9 @@ class RotatingWorkTypeView(APIView):
     serializer_class = RotatingWorkTypeSerializer
     permission_classes = [IsAuthenticated]
 
-    @method_decorator(permission_required("base.view_rotatingworktype"), name='dispatch')
+    @method_decorator(
+        permission_required("base.view_rotatingworktype"), name="dispatch"
+    )
     def get(self, request, pk=None):
         if pk:
             rotating_work_type = object_check(RotatingWorkType, pk)
@@ -852,7 +920,7 @@ class RotatingWorkTypeView(APIView):
         serializer = self.serializer_class(rotating_work_types, many=True)
         return Response(serializer.data, status=200)
 
-    @method_decorator(permission_required("base.add_rotatingworktype"), name='dispatch')
+    @method_decorator(permission_required("base.add_rotatingworktype"), name="dispatch")
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -860,19 +928,22 @@ class RotatingWorkTypeView(APIView):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("base.change_rotatingworktype"), name='dispatch')
+    @method_decorator(
+        permission_required("base.change_rotatingworktype"), name="dispatch"
+    )
     def put(self, request, pk):
         rotating_work_type = object_check(RotatingWorkType, pk)
         if rotating_work_type is None:
             return Response({"error": "RotatingWorkType not found"}, status=404)
-        serializer = self.serializer_class(
-            rotating_work_type, data=request.data)
+        serializer = self.serializer_class(rotating_work_type, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("base.delete_rotatingworktype"), name='dispatch')
+    @method_decorator(
+        permission_required("base.delete_rotatingworktype"), name="dispatch"
+    )
     def delete(self, request, pk):
         rotating_work_type = object_check(RotatingWorkType, pk)
         if rotating_work_type is None:
@@ -901,8 +972,9 @@ class ShiftRequestApproveView(APIView):
                 shift_request.save()
                 return Response({"status": "success"}, status=200)
             else:
-                return Response({"error": "Already request exits on same date"}, status=400)
-
+                return Response(
+                    {"error": "Already request exits on same date"}, status=400
+                )
 
         return Response({"error": "No permission "}, status=400)
 
@@ -1008,7 +1080,10 @@ class ShiftRequestDeleteView(APIView):
             shift_request.delete()
 
         except ShiftRequest.DoesNotExist:
-            return Response({"status": "failed", "error": "Shift request does not exists"}, status=400)
+            return Response(
+                {"status": "failed", "error": "Shift request does not exists"},
+                status=400,
+            )
         return Response({"status": "deleted"}, status=200)
 
 
@@ -1043,10 +1118,9 @@ class RotatingShiftAssignBulkArchive(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request, status):
-        ids = request.data.get('ids', None)
+        ids = request.data.get("ids", None)
         try:
-            rotating_shift_asssign = RotatingShiftAssign.objects.filter(
-                id__in=ids)
+            rotating_shift_asssign = RotatingShiftAssign.objects.filter(id__in=ids)
             rotating_shift_asssign.update(is_active=status)
             return Response({"status": "success"}, status=200)
         except Exception as E:
@@ -1057,10 +1131,9 @@ class RotatingShiftAssignBulkDelete(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request):
-        ids = request.data.get('ids', None)
+        ids = request.data.get("ids", None)
         try:
-            rotating_shift_asssign = RotatingShiftAssign.objects.filter(
-                id__in=ids)
+            rotating_shift_asssign = RotatingShiftAssign.objects.filter(id__in=ids)
             rotating_shift_asssign.delete()
             return Response({"status": "success"}, status=200)
         except Exception as E:
@@ -1095,8 +1168,7 @@ class ActiontypeView(APIView):
         action_type = object_check(Actiontype, pk)
         if action_type is None:
             return Response({"error": "Actiontype not found"}, status=404)
-        serializer = self.serializer_class(
-            action_type, data=request.data)
+        serializer = self.serializer_class(action_type, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=200)
@@ -1108,4 +1180,3 @@ class ActiontypeView(APIView):
             return Response({"error": "Actiontype not found"}, status=404)
         response, status_code = object_delete(Actiontype, pk)
         return Response(response, status=status_code)
-

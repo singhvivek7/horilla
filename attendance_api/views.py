@@ -1,36 +1,42 @@
-from django.db.models import Case, Value, When, F, CharField
+from datetime import date, datetime, timedelta, timezone
+
+from django.conf import settings
+from django.contrib.auth.decorators import permission_required
+from django.db.models import Case, CharField, F, Value, When
 from django.http import QueryDict
-from attendance.forms import NewRequestForm
-from attendance.models import AttendanceActivity
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from datetime import date, datetime, timedelta
-from attendance.models import EmployeeShiftDay
-from attendance.views.dashboard import find_expected_attendances, find_late_come, find_on_time
-from attendance.views.views import *
-from attendance.views.clock_in_out import *
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.core.exceptions import ObjectDoesNotExist
-from attendance.models import Attendance
+from rest_framework.views import APIView
+
+from attendance.models import Attendance, AttendanceActivity, EmployeeShiftDay
+from attendance.views.clock_in_out import *
+from attendance.views.dashboard import (
+    find_expected_attendances,
+    find_late_come,
+    find_on_time,
+)
+from attendance.views.views import *
 from base.methods import is_reportingmanager
 from base_api.decorators import manager_permission_required
 from base_api.methods import groupby_queryset, permission_based_queryset
 from employee.filters import EmployeeFilter
-from django.core.exceptions import ObjectDoesNotExist
-from .serializers import AttendanceActivitySerializer, AttendanceLateComeEarlyOutSerializer, AttendanceOverTimeSerializer, AttendanceRequestSerializer, AttendanceSerializer
-from rest_framework.pagination import PageNumberPagination
-from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import permission_required
-from django.conf import settings
+
+from .serializers import (
+    AttendanceActivitySerializer,
+    AttendanceLateComeEarlyOutSerializer,
+    AttendanceOverTimeSerializer,
+    AttendanceRequestSerializer,
+    AttendanceSerializer,
+)
 
 # Create your views here.
 
 
 def query_dict(data):
-    from django.http import QueryDict
-    query_dict = QueryDict('', mutable=True)
+    query_dict = QueryDict("", mutable=True)
     for key, value in data.items():
         if isinstance(value, list):
             for item in value:
@@ -75,8 +81,7 @@ class ClockInAPIView(APIView):
 
                     date_yesterday = date_today - timedelta(days=1)
                     day_yesterday = date_yesterday.strftime("%A").lower()
-                    day_yesterday = EmployeeShiftDay.objects.get(
-                        day=day_yesterday)
+                    day_yesterday = EmployeeShiftDay.objects.get(day=day_yesterday)
                     minimum_hour, start_time_sec, end_time_sec = shift_schedule_today(
                         day=day_yesterday, shift=shift
                     )
@@ -96,7 +101,10 @@ class ClockInAPIView(APIView):
             )
             return Response({"message": "Clocked-In"}, status=200)
         return Response(
-            {"error": "You Don't have work information filled or your employee detail neither entered "})
+            {
+                "error": "You Don't have work information filled or your employee detail neither entered "
+            }
+        )
 
 
 class ClockOutAPIView(APIView):
@@ -126,8 +134,7 @@ class ClockOutAPIView(APIView):
         minimum_hour, start_time_sec, end_time_sec = shift_schedule_today(
             day=day, shift=shift
         )
-        early_out_instance = attendance.late_come_early_out.filter(
-            type="early_out")
+        early_out_instance = attendance.late_come_early_out.filter(type="early_out")
         if not early_out_instance.exists():
             early_out(
                 attendance=attendance, start_time=start_time_sec, end_time=end_time_sec
@@ -144,7 +151,7 @@ class AttendanceView(APIView):
     filterset_class = AttendanceFilters
 
     def get_queryset(self, request, type):
-        if type == 'ot':
+        if type == "ot":
             condition = AttendanceValidationCondition.objects.first()
             minot = strtime_seconds("00:30")
             if condition is not None:
@@ -154,17 +161,16 @@ class AttendanceView(APIView):
                     attendance_validated=True,
                 )
 
-        elif type == 'validated':
+        elif type == "validated":
             queryset = Attendance.objects.filter(attendance_validated=True)
-        elif type == 'non-validated':
+        elif type == "non-validated":
             queryset = Attendance.objects.filter(attendance_validated=False)
         else:
             queryset = Attendance.objects.all()
         user = request.user
         # checking user level permissions
         perm = "attendance.view_attendance"
-        queryset = permission_based_queryset(
-            user, perm, queryset, user_obj=True)
+        queryset = permission_based_queryset(user, perm, queryset, user_obj=True)
         return queryset
 
     def get(self, request, pk=None, type=None):
@@ -177,15 +183,17 @@ class AttendanceView(APIView):
         attendances = self.get_queryset(request, type)
         # filtering queryset
         attendances_filter_queryset = self.filterset_class(
-            request.GET, queryset=attendances).qs
+            request.GET, queryset=attendances
+        ).qs
         field_name = request.GET.get("groupby_field", None)
         if field_name:
             url = request.build_absolute_uri()
-            return groupby_queryset(request, url, field_name, attendances_filter_queryset)
+            return groupby_queryset(
+                request, url, field_name, attendances_filter_queryset
+            )
         # pagination workflow
         paginater = PageNumberPagination()
-        page = paginater.paginate_queryset(
-            attendances_filter_queryset, request)
+        page = paginater.paginate_queryset(attendances_filter_queryset, request)
         serializer = AttendanceSerializer(page, many=True)
         return paginater.get_paginated_response(serializer.data)
 
@@ -199,17 +207,20 @@ class AttendanceView(APIView):
             return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("attendance.change_attendance", raise_exception=True))
+    @method_decorator(
+        permission_required("attendance.change_attendance", raise_exception=True)
+    )
     def put(self, request, pk):
         attendance = Attendance.objects.get(id=pk)
-        serializer = AttendanceSerializer(
-            instance=attendance, data=request.data)
+        serializer = AttendanceSerializer(instance=attendance, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("attendance.delete_attendance", raise_exception=True))
+    @method_decorator(
+        permission_required("attendance.delete_attendance", raise_exception=True)
+    )
     def delete(self, request, pk):
         attendance = Attendance.objects.get(id=pk)
         month = attendance.attendance_date
@@ -230,15 +241,15 @@ class AttendanceView(APIView):
                 overtime.save()
             try:
                 attendance.delete()
-                return Response({"status","deleted"},status=200)
+                return Response({"status", "deleted"}, status=200)
             except Exception as error:
-                return Response({"error:",f"{error}"},status=400)
+                return Response({"error:", f"{error}"}, status=400)
         else:
             try:
                 attendance.delete()
-                return Response({"status","deleted"},status=200)
+                return Response({"status", "deleted"}, status=200)
             except Exception as error:
-                return Response({"error:",f"{error}"},status=400)
+                return Response({"error:", f"{error}"}, status=400)
 
 
 class ValidateAttendanceView(APIView):
@@ -256,18 +267,21 @@ class ValidateAttendanceView(APIView):
                 verb_fr=f"Votre présence pour la date {attendance.attendance_date} est validée.",
                 redirect="/attendance/view-my-attendance",
                 icon="checkmark",
-                api_redirect=f"/api/attendance/attendance?employee_id{attendance.employee_id}"
+                api_redirect=f"/api/attendance/attendance?employee_id{attendance.employee_id}",
             )
         except:
             pass
         return Response(status=200)
 
+
 class OvertimeApproveView(APIView):
     def put(self, request, pk):
         try:
-            attendance = Attendance.objects.filter(id=pk).update(attendance_overtime_approve=True)
+            attendance = Attendance.objects.filter(id=pk).update(
+                attendance_overtime_approve=True
+            )
         except Exception as E:
-            return Response({"error":str(E)} , status=400)
+            return Response({"error": str(E)}, status=400)
 
         attendance = Attendance.objects.filter(id=pk).first()
         try:
@@ -281,11 +295,11 @@ class OvertimeApproveView(APIView):
                 verb_fr=f"Les heures supplémentaires pour la date {attendance.attendance_date} ont été approuvées.",
                 redirect="/attendance/attendance-overtime-view",
                 icon="checkmark",
-                api_redirect="/api/attendance/attendance-hour-account/"
+                api_redirect="/api/attendance/attendance-hour-account/",
             )
         except:
             pass
-        return Response( status=200)
+        return Response(status=200)
 
 
 class AttendanceRequestView(APIView):
@@ -318,10 +332,8 @@ class AttendanceRequestView(APIView):
             return groupby_queryset(request, url, field_name, request_filtered_queryset)
 
         pagenation = PageNumberPagination()
-        page = pagenation.paginate_queryset(
-            request_filtered_queryset, request)
-        serializer = self.serializer_class(
-            page, many=True)
+        page = pagenation.paginate_queryset(request_filtered_queryset, request)
+        serializer = self.serializer_class(page, many=True)
         return pagenation.get_paginated_response(serializer.data)
 
     @manager_permission_required("attendance.add_attendance")
@@ -335,8 +347,7 @@ class AttendanceRequestView(APIView):
     @manager_permission_required("attendance.update_attendance")
     def put(self, request, pk):
         attendance = Attendance.objects.get(id=pk)
-        serializer = AttendanceRequestSerializer(
-            instance=attendance, data=request.data)
+        serializer = AttendanceRequestSerializer(instance=attendance, data=request.data)
         if serializer.is_valid():
             instance = serializer.save()
             instance.employee_id = attendance.employee_id
@@ -381,8 +392,7 @@ class AttendanceRequestApproveView(APIView):
                     if requested_data["attendance_clock_out_date"] == "None"
                     else requested_data["attendance_clock_out_date"]
                 )
-                Attendance.objects.filter(
-                    id=pk).update(**requested_data)
+                Attendance.objects.filter(id=pk).update(**requested_data)
                 # DUE TO AFFECT THE OVERTIME CALCULATION ON SAVE METHOD, SAVE THE INSTANCE ONCE MORE
                 attendance = Attendance.objects.get(id=pk)
                 attendance.save()
@@ -446,15 +456,13 @@ class AttendanceOverTimeView(APIView):
 
     def get(self, request, pk=None):
         if pk:
-            attendance_ot = get_object_or_404(
-                AttendanceOverTime, pk=pk)
+            attendance_ot = get_object_or_404(AttendanceOverTime, pk=pk)
             serializer = AttendanceOverTimeSerializer(attendance_ot)
             return Response(serializer.data, status=200)
 
         filterset_class = AttendanceOverTimeFilter(request.GET)
         queryset = filterset_class.qs
-        self_account = queryset.filter(
-            employee_id__employee_user_id=request.user)
+        self_account = queryset.filter(employee_id__employee_user_id=request.user)
         permission_based_queryset = filtersubordinates(
             request, queryset, "attendance.view_attendanceovertime"
         )
@@ -466,10 +474,8 @@ class AttendanceOverTimeView(APIView):
             return groupby_queryset(request, url, field_name, queryset)
 
         pagenation = PageNumberPagination()
-        page = pagenation.paginate_queryset(
-            queryset, request)
-        serializer = AttendanceOverTimeSerializer(
-            page, many=True)
+        page = pagenation.paginate_queryset(queryset, request)
+        serializer = AttendanceOverTimeSerializer(page, many=True)
         return pagenation.get_paginated_response(serializer.data)
 
     @manager_permission_required("attendance.add_attendanceovertime")
@@ -484,18 +490,23 @@ class AttendanceOverTimeView(APIView):
     def put(self, request, pk):
         attendance_ot = get_object_or_404(AttendanceOverTime, pk=pk)
         serializer = AttendanceOverTimeSerializer(
-            instance=attendance_ot, data=request.data)
+            instance=attendance_ot, data=request.data
+        )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
-    @method_decorator(permission_required("attendance.delete_attendanceovertime", raise_exception=True))
+    @method_decorator(
+        permission_required(
+            "attendance.delete_attendanceovertime", raise_exception=True
+        )
+    )
     def delete(self, request, pk):
         attendance = get_object_or_404(AttendanceOverTime, pk=pk)
         attendance.delete()
 
-        return Response({'message': 'Overtime deleted successfully'}, status=204)
+        return Response({"message": "Overtime deleted successfully"}, status=204)
 
 
 class LateComeEarlyOutView(APIView):
@@ -507,7 +518,7 @@ class LateComeEarlyOutView(APIView):
     def delete(self, request, pk=None):
         attendance = get_object_or_404(AttendanceLateComeEarlyOut, pk=pk)
         attendance.delete()
-        return Response({'message': 'Attendance deleted successfully'}, status=204)
+        return Response({"message": "Attendance deleted successfully"}, status=204)
 
 
 class AttendanceActivityView(APIView):
@@ -536,7 +547,9 @@ class TodayAttendance(APIView):
                 f"{(marked_attendances / expected_attendances) * 100:.2f}"
             )
 
-        return Response({"marked_attendances_ratio": marked_attendances_ratio}, status=200)
+        return Response(
+            {"marked_attendances_ratio": marked_attendances_ratio}, status=200
+        )
 
 
 class OfflineEmployeesCountView(APIView):
@@ -563,8 +576,6 @@ class OfflineEmployeesListView(APIView):
         return pagenation.get_paginated_response(page)
 
     def get_leave_status(self, queryset):
-        from django.db.models import Case, Value, When, CharField
-        from datetime import date
 
         today = date.today()
         queryset = queryset.distinct()
@@ -576,31 +587,83 @@ class OfflineEmployeesListView(APIView):
                     leaverequest__start_date__lte=today,
                     leaverequest__end_date__gte=today,
                     leaverequest__status="approved",
-                    then=Value("On Leave")
+                    then=Value("On Leave"),
                 ),
                 When(
                     leaverequest__start_date__lte=today,
                     leaverequest__end_date__gte=today,
                     leaverequest__status="requested",
-                    then=Value("Waiting Approval")
+                    then=Value("Waiting Approval"),
                 ),
                 When(
                     leaverequest__start_date__lte=today,
                     leaverequest__end_date__gte=today,
-                    then=Value("Canceled / Rejected")
+                    then=Value("Canceled / Rejected"),
                 ),
                 When(
-                    employee_attendances__attendance_date=today,
-                    then=Value("Working")
+                    employee_attendances__attendance_date=today, then=Value("Working")
                 ),
                 default=Value("Expected working"),  # Default status
                 output_field=CharField(),
             )
-        ).values('employee_first_name', 'employee_last_name', 'leave_status', 'employee_profile')
+        ).values(
+            "employee_first_name",
+            "employee_last_name",
+            "leave_status",
+            "employee_profile",
+        )
 
         for employee in employees_with_leave_status:
-            if employee['employee_profile']:
-                employee['employee_profile'] = settings.MEDIA_URL + \
-                    employee['employee_profile']
+            if employee["employee_profile"]:
+                employee["employee_profile"] = (
+                    settings.MEDIA_URL + employee["employee_profile"]
+                )
         return employees_with_leave_status
- 
+
+
+class CheckingStatus(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @classmethod
+    def _format_seconds(cls, seconds):
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        seconds = seconds % 60
+        return f"{hours:02}:{minutes:02}:{seconds:02}"
+
+    def get(self, request):
+        attendance_activity = (
+            AttendanceActivity.objects.filter(employee_id=request.user.employee_get)
+            .order_by("-id")
+            .first()
+        )
+        duration = None
+        work_seconds = request.user.employee_get.get_forecasted_at_work()[
+            "forecasted_at_work_seconds"
+        ]
+        duration = CheckingStatus._format_seconds(int(work_seconds))
+        status = False
+        clock_in_time = None
+
+        today = datetime.now()
+        attendance_activity_first = (
+            AttendanceActivity.objects.filter(
+                employee_id=request.user.employee_get, clock_in_date=today
+            )
+            .order_by("in_datetime")
+            .first()
+        )
+        if attendance_activity:
+            clock_in_time = attendance_activity_first.clock_in.strftime("%I:%M %p")
+            if attendance_activity.clock_out_date:
+                status = False
+            else:
+                status = True
+                return Response(
+                    {"status": status, "duration": duration, "clock_in": clock_in_time},
+                    status=200,
+                )
+        return Response(
+            {"status": status, "duration": duration, "clock_in_time": clock_in_time},
+            status=200,
+        )
