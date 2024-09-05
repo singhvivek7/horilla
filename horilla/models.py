@@ -2,7 +2,7 @@
 models.py
 =========
 
-This module defines the abstract base model `HorillaModel` for the Horilla HRMS project.
+This module defines the abstract base model `HorillaModel` for the PayBolt HRMS project.
 The `HorillaModel` provides common fields and functionalities for other models within
 the application, such as tracking creation and modification timestamps and user
 information, audit logging, and active/inactive status management.
@@ -37,7 +37,7 @@ setattr(FieldFile, "url", url)
 class HorillaModel(models.Model):
     """
     An abstract base model that includes common fields and functionalities
-    for models within the Horilla application.
+    for models within the PayBolt application.
     """
 
     created_at = models.DateTimeField(

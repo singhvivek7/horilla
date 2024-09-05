@@ -48,10 +48,10 @@ class Command(BaseCommand):
                 employee.email = email
                 employee.phone = phone
                 employee.save()
-                bot = User.objects.filter(username="Horilla Bot").first()
+                bot = User.objects.filter(username="PayBolt Bot").first()
                 if bot is None:
                     User.objects.create_user(
-                        username="Horilla Bot",
+                        username="PayBolt Bot",
                         password=str(uuid.uuid4()),
                     )
 

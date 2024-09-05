@@ -1,7 +1,7 @@
 """
 horilla/config.py
 
-Horilla app configurations
+PayBolt app configurations
 """
 
 import importlib

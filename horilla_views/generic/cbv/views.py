@@ -454,7 +454,7 @@ class HorillaListView(ListView):
 
 class HorillaSectionView(TemplateView):
     """
-    Horilla Template View
+    PayBolt Template View
     """
 
     def __init__(self, **kwargs: Any) -> None:
@@ -492,7 +492,7 @@ class HorillaDetailedView(DetailView):
 
     title = "Detailed View"
     template_name = "generic/horilla_detailed_view.html"
-    header: dict = {"title": "Horilla", "subtitle": "Horilla Detailed View"}
+    header: dict = {"title": "PayBolt", "subtitle": "PayBolt Detailed View"}
     body: list = []
 
     action_method: list = []

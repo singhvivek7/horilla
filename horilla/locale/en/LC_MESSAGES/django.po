@@ -12076,7 +12076,7 @@ msgid "This {} is already in use for {}."
 msgstr ""
 
 #: base/views.py:1342
-msgid "Test mail from Horilla"
+msgid "Test mail from PayBolt"
 msgstr ""
 
 #: base/views.py:1403
@@ -23173,7 +23173,7 @@ msgstr ""
 
 #: templates/initialize_database/horilla_user.html:99
 msgid ""
-"Authenticate with your password to initialize the Horilla HRMS database."
+"Authenticate with your password to initialize the PayBolt HRMS database."
 msgstr ""
 
 #: templates/initialize_database/horilla_user.html:147
@@ -23185,7 +23185,7 @@ msgid "Sign Up"
 msgstr ""
 
 #: templates/initialize_database/horilla_user_signup.html:33
-msgid "Please sign up to access the Horilla HRMS."
+msgid "Please sign up to access the PayBolt HRMS."
 msgstr ""
 
 #: templates/initialize_database/horilla_user_signup.html:148
@@ -23373,7 +23373,7 @@ msgstr ""
 
 #, fuzzy
 #~| msgid "recruitment"
-#~ msgid "Horilla - Open Recruitments"
+#~ msgid "PayBolt - Open Recruitments"
 #~ msgstr "Recruitment"
 
 #, fuzzy

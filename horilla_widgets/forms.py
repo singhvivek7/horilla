@@ -1,7 +1,7 @@
 """
 forms.py
 
-Horilla forms
+PayBolt forms
 """
 
 from typing import Any, Dict

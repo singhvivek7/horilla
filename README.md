@@ -1,13 +1,13 @@
 
-# **Horilla 🦍** [![AGPL License](https://img.shields.io/badge/license-AGPL-blue.svg)](http://www.gnu.org/licenses/agpl-3.0)
-Horilla is a Free and Open Source HRMS Software.
+# **PayBolt 🦍** [![AGPL License](https://img.shields.io/badge/license-AGPL-blue.svg)](http://www.gnu.org/licenses/agpl-3.0)
+PayBolt is a Free and Open Source HRMS Software.
 
 <img width="1470" alt="Screenshot 2024-03-15 at 3 05 20 PM" src="https://github.com/horilla-opensource/horilla/assets/131998600/1317bd0a-03a8-40be-8fb2-ecb655bb5c13">
 
 
 ## **Installation**
 ____
-Horilla can be installed on your system by following the below commands.
+PayBolt can be installed on your system by following the below commands.
 
 You'll have to install python, django and the database you wish to use for the project as a prerequisites.
 
@@ -112,10 +112,10 @@ This should output the version number of Django that you just installed.
 Congratulations, you have successfully installed Django on your machine!
 You can now start building web applications using Django.
 
-### **Installing Horilla**
+### **Installing PayBolt**
 ___
 
-For installing the Horilla, follow the following steps:
+For installing the PayBolt, follow the following steps:
 1. Clone the project repository from GitHub:
 ```bash
 git clone https://github.com/horilla-opensource/horilla.git
@@ -141,7 +141,7 @@ For installing the python dependencies required for the project, run the followi
 python manage.py makemigrations
 python manage.py migrate
 ```
-4. Create an admin employee account (use this command if you are starting with a fresh database, for the demo database there is already a Horilla admin user created with credentials _admin_ and _admin_ as username and password respectively).
+4. Create an admin employee account (use this command if you are starting with a fresh database, for the demo database there is already a PayBolt admin user created with credentials _admin_ and _admin_ as username and password respectively).
 ```bash
 python manage.py createhorillauser
 ```
@@ -165,10 +165,10 @@ To run the project locally, execute the following command:
 ```bash
 python manage.py runserver
 ```
-If everything is configured correctly, you should be able to access your Horilla app at http://localhost:8000.
+If everything is configured correctly, you should be able to access your PayBolt app at http://localhost:8000.
 
 >Note:
->>If you wish to run the Horilla application to any other port, you can specify the port number after the runserver command.
+>>If you wish to run the PayBolt application to any other port, you can specify the port number after the runserver command.
 
 >>eg: *python  manage.py runserver <port_number>*
 
@@ -348,4 +348,4 @@ ___
 [Cybrosys Technologies](https://www.cybrosys.com/)
 
 ### **ABOUT**
-[Horilla](https://www.horilla.com/)
+[PayBolt](https://www.horilla.com/)
