@@ -19155,7 +19155,7 @@ msgstr "Gente"
 msgid "Others"
 msgstr "Otros"
 
-msgid "View All Company Leave"
+msgid "View PayBolt HR Leave"
 msgstr "Vista todas dejar empresa"
 
 msgid "Week"

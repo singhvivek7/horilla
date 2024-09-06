@@ -23965,7 +23965,7 @@ msgstr ""
 #~ msgid "Others"
 #~ msgstr "Divers"
 
-#~ msgid "View All Company Leave"
+#~ msgid "View PayBolt HR Leave"
 #~ msgstr "Zeige alle Betriebsurlaube"
 
 #~ msgid "Week"

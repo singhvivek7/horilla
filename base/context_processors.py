@@ -24,7 +24,7 @@ class AllCompany:
     class Urls:
         url = "https://ui-avatars.com/api/?name=All+Company&background=random"
 
-    company = "All Company"
+    company = "PayBolt HR"
     icon = Urls()
     text = "All companies"
     id = None
@@ -41,7 +41,7 @@ def get_companies(request):
     companies = [
         [
             "all",
-            "All Company",
+            "PayBolt HR",
             "https://ui-avatars.com/api/?name=All+Company&background=random",
             False,
         ],

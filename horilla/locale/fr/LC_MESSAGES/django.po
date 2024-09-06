@@ -12763,7 +12763,7 @@ msgstr "Demande et Allocation"
 #~ msgid "Accrual"
 #~ msgstr "D'accumulation"
 
-#~ msgid "View All Company Leave"
+#~ msgid "View PayBolt HR Leave"
 #~ msgstr "Voir Tous Entreprise Congés"
 
 #~ msgid "Week"
