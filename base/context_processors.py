@@ -22,11 +22,11 @@ class AllCompany:
     """
 
     class Urls:
-        url = "https://ui-avatars.com/api/?name=All+Company&background=random"
+        url = "https://ui-avatars.com/api/?name=Pay+Bolt&background=random"
 
     company = "PayBolt HR"
     icon = Urls()
-    text = "All companies"
+    text = "PayBolt HRMS Software"
     id = None
 
 
