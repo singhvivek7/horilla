@@ -267,11 +267,11 @@ form label {
 }
 
 .oh-titlebar__tag.filter-field {
-    border: solid 1px #ff450033;
+    border: solid 1px #8744c176;
 }
 
 .oh-titlebar__tag--custom {
-    background-color: rgba(255, 68, 0, 0.543) !important;
+    background-color: hsl(272,50%,51%,0.53) !important;
     color: white;
 }
 
@@ -385,7 +385,7 @@ form label {
 
 .delete-all-link {
     position: absolute;
-    color: rgb(63 124 242);
+    color: hsl(272,50%,51%);
     top: -5px;
     right: 10px;
     margin: 10px;
